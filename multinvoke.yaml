@@ -1,0 +1,67 @@
+---
+swagger: "2.0"
+info:
+  x-ibm-name: "multinvoke"
+  title: "multinvoke"
+  version: "1.0.0"
+schemes:
+- "https"
+host: "$(catalog.host)"
+basePath: "/multinvoke"
+consumes:
+- "application/x-www-form-urlencoded"
+produces:
+- "application/json"
+- "application/x-www-form-urlencoded"
+securityDefinitions: {}
+x-ibm-configuration:
+  testable: true
+  enforced: true
+  cors:
+    enabled: true
+  assembly:
+    execute:
+    - invoke:
+        title: "invoke"
+        timeout: 60
+        verb: "keep"
+        cache-response: "protocol"
+        cache-ttl: 900
+        stop-on-error:
+        - null
+        version: "1.0.0"
+        target-url: "http://proton.safexpress.com/Sfxwebapitest2/token"
+    - gatewayscript:
+        title: "gatewayscript"
+        version: "1.0.0"
+        source: "var getAll = apim.getvariable('message.body');\n\nvar token = 'bearer\
+          \ '+ getAll.access_token;\n\napim.setvariable('message.headers.authorization',token);\n\
+          \n// apim.setvariable('message.querystring.RequesterID','samsung.com');\n\
+          \n// apim.setvariable('message.querystring.FromDateTime','01-Jan-2018');\n\
+          \n// apim.setvariable('message.querystring', '14-Feb-2018');"
+    - invoke:
+        title: "invoke"
+        timeout: 60
+        verb: "GET"
+        cache-response: "protocol"
+        cache-ttl: 900
+        stop-on-error:
+        - null
+        version: "1.0.0"
+        target-url: "http://proton.safexpress.com/Sfxwebapitest2/api/portal/wayill/GetWaybillInformation?RequesterID=samsung.com&FromDateTime=01-Jan-2018&ToDateTime=14-Feb-2018"
+  phase: "realized"
+  gateway: "datapower-gateway"
+paths:
+  /token:
+    post:
+      responses:
+        200:
+          description: "200 OK"
+    parameters:
+    - name: "clientDetails"
+      required: false
+      in: "body"
+      schema:
+        type: "object"
+definitions: {}
+tags: []
