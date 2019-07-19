@@ -1,0 +1,277 @@
+---
+swagger: "2.0"
+info:
+  x-ibm-name: "isurepay"
+  title: "iSurePay"
+  version: "1.0.0"
+schemes:
+- "https"
+host: "$(catalog.host)"
+basePath: "/isurepay"
+consumes:
+- "application/json"
+produces:
+- "application/json"
+securityDefinitions:
+  clientSecret:
+    type: "apiKey"
+    description: ""
+    in: "header"
+    name: "X-IBM-Client-Secret"
+  clientIdHeader:
+    type: "apiKey"
+    in: "header"
+    name: "X-IBM-Client-Id"
+    description: "jayan.unni@in.ibm.com"
+security:
+- clientIdHeader: []
+  clientSecret: []
+x-ibm-configuration:
+  testable: true
+  enforced: true
+  cors:
+    enabled: true
+  assembly:
+    execute:
+    - operation-switch:
+        title: "operation-switch"
+        case:
+        - operations:
+          - verb: "post"
+            path: "/validation"
+          execute:
+          - invoke:
+              title: "Validation"
+              timeout: 60
+              verb: "POST"
+              cache-response: "protocol"
+              stop-on-error:
+              - null
+              version: "1.0.0"
+              username: "jayan.unni@in.ibm.com"
+              password: "P@ssw0rd!"
+              target-url: "$(backenedApiUri)/validation"
+              cache-ttl: 5
+          - if:
+              title: "if"
+              condition: "apim.getvariable('message.status.code')!='200';"
+              execute:
+              - set-variable:
+                  title: "set-variable"
+                  actions:
+                  - set: "msg"
+                    value: "Sorry! The Service is not Active!"
+                  version: "1.0.0"
+              - invoke:
+                  title: "Push Notification"
+                  timeout: 60
+                  verb: "POST"
+                  cache-response: "protocol"
+                  cache-ttl: 5
+                  stop-on-error:
+                  - null
+                  version: "1.0.0"
+                  target-url: "http://bulkpush.mytoday.com/BulkSms/SingleMsgApi?feedid=372423&username=9870902209&password=P0rt@ll2018&To=9004112308&Text=$(msg)"
+                  username: "jayan.unni@in.ibm.com"
+                  password: "P@ssw0rd!"
+              - set-variable:
+                  title: "set-variable"
+                  actions:
+                  - value: "{\"message\":\"Sorry The Service is not Active\"}"
+                    set: "message.body"
+                  - set: "message.status.code"
+                    value: "503"
+                  - set: "message.headers.content-type"
+                    value: "application/json"
+                  version: "1.0.0"
+              version: "1.0.0"
+        - operations:
+          - verb: "post"
+            path: "/receipting"
+          execute:
+          - invoke:
+              title: "Receipting"
+              timeout: 60
+              verb: "POST"
+              cache-response: "protocol"
+              stop-on-error:
+              - null
+              version: "1.0.0"
+              username: "jayan.unni@in.ibm.com"
+              password: "P@ssw0rd!"
+              target-url: "$(backenedApiUri)/receipting"
+              cache-ttl: 5
+          - if:
+              title: "if"
+              condition: "apim.getvariable('message.status.code')!='200';"
+              execute:
+              - set-variable:
+                  title: "set-variable"
+                  actions:
+                  - set: "msg"
+                    value: "Sorry The Service is not Active"
+                  version: "1.0.0"
+              - invoke:
+                  title: "Push Notification"
+                  timeout: 60
+                  verb: "POST"
+                  cache-response: "protocol"
+                  cache-ttl: 5
+                  stop-on-error:
+                  - null
+                  version: "1.0.0"
+                  target-url: "http://bulkpush.mytoday.com/BulkSms/SingleMsgApi?feedid=372423&username=9870902209&password=P0rt@ll2018&To=9004112308&Text=$(msg)"
+                  username: "jayan.unni@in.ibm.com"
+                  password: "P@ssw0rd!"
+              - set-variable:
+                  title: "set-variable"
+                  actions:
+                  - value: "{\"message\":\"Sorry The Service is not Active\"}"
+                    set: "message.body"
+                  - set: "message.status.code"
+                    value: "503"
+                  - set: "message.headers.content-type"
+                    value: "application/json"
+                  version: "1.0.0"
+              version: "1.0.0"
+        otherwise: []
+        version: "1.0.0"
+    catch:
+    - errors: []
+      execute: []
+  phase: "realized"
+  properties:
+    backenedApiUri:
+      value: "https://partner.rnfi.in/schedulars/isurepay/"
+      description: ""
+      encoded: false
+  catalogs:
+    Sandbox:
+      properties:
+        backenedApiUri: "https://partner.rnfi.in/schedulars/isurepay/"
+paths:
+  /validation:
+    post:
+      responses:
+        200:
+          description: "200 OK"
+          schema:
+            $ref: "#/definitions/validateResponse"
+      parameters:
+      - name: "REQUEST"
+        required: false
+        in: "body"
+        schema:
+          $ref: "#/definitions/validationRequest"
+  /receipting:
+    post:
+      responses:
+        200:
+          description: "200 OK"
+          schema:
+            $ref: "#/definitions/receiptingResponse"
+      parameters:
+      - name: "REQUEST"
+        required: false
+        in: "body"
+        schema:
+          $ref: "#/definitions/receiptingRequest"
+tags: []
+definitions:
+  receiptingRequestBody:
+    description: ""
+    type: "object"
+    properties:
+      transaction_date:
+        type: "string"
+        format: "date"
+      i_bank_transaction_id:
+        type: "string"
+      amount:
+        type: "number"
+        format: "double"
+      pay_mode:
+        type: "string"
+      ACCOUNTNUMBER:
+        type: "string"
+      isure_id:
+        type: "string"
+      client_code:
+        type: "string"
+    example:
+      transaction_date: "05-12-2017"
+      i_bank_transaction_id: "M3211622"
+      amount: "10"
+      pay_mode: "C"
+      ACCOUNTNUMBER: "R0030329811790927"
+      isure_id: "1001573945"
+      client_code: "RNFI"
+  validationRequestBody:
+    description: ""
+    type: "object"
+    properties:
+      ACCOUNTNUMBER:
+        type: "string"
+      client_code:
+        type: "string"
+    example:
+      ACCOUNTNUMBER: "R0030329811790927"
+      client_code: "RNFI"
+  validationRequest:
+    properties:
+      validate:
+        $ref: "#/definitions/validationRequestBody"
+    additionalProperties: false
+  receiptingRequest:
+    properties:
+      notify:
+        $ref: "#/definitions/receiptingRequestBody"
+    additionalProperties: false
+  validationResponseBody:
+    description: ""
+    type: "object"
+    properties:
+      client_code:
+        type: "string"
+      ACCOUNTNUMBER:
+        type: "string"
+      amount:
+        type: "number"
+        format: "double"
+      status:
+        type: "string"
+      reject_reason:
+        type: "string"
+    example:
+      client_code: "RNFI"
+      ACCOUNTNUMBER: "R0030329811790927"
+      amount: 0
+      status: "accept"
+      reject_reason: ""
+  receiptingResponseBody:
+    description: ""
+    type: "object"
+    properties:
+      client_code:
+        type: "string"
+      ACCOUNTNUMBER:
+        type: "string"
+      status:
+        type: "string"
+      reject_reason:
+        type: "string"
+    example:
+      client_code: null
+      ACCOUNTNUMBER: null
+      status: "reject"
+      reject_reason: "Amount can not be less than 1000 or greater than 500000"
+  validateResponse:
+    properties:
+      validateResponse:
+        $ref: "#/definitions/validationResponseBody"
+    additionalProperties: false
+  receiptingResponse:
+    properties:
+      receiptingResponse:
+        $ref: "#/definitions/receiptingResponseBody"
+    additionalProperties: false

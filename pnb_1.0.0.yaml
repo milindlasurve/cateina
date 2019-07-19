@@ -1,0 +1,106 @@
+---
+swagger: "2.0"
+info:
+  x-ibm-name: "pnb"
+  title: "PNB"
+  version: "1.0.0"
+schemes:
+- "https"
+host: "$(catalog.host)"
+basePath: "/pnb"
+consumes:
+- "application/json"
+produces:
+- "application/json"
+securityDefinitions:
+  clientIdHeader:
+    type: "apiKey"
+    in: "header"
+    name: "X-IBM-Client-Id"
+security:
+- clientIdHeader: []
+x-ibm-configuration:
+  testable: true
+  enforced: true
+  cors:
+    enabled: true
+  assembly:
+    execute:
+    - invoke:
+        target-url: "$(target-url)$(request.path)"
+  phase: "realized"
+paths:
+  /path-1:
+    get:
+      responses:
+        200:
+          description: "200 OK"
+    post:
+      responses:
+        200:
+          description: "200 OK"
+      parameters:
+      - name: "request"
+        required: false
+        in: "body"
+        schema:
+          $ref: "#/definitions/a"
+definitions:
+  a:
+    properties:
+      id:
+        type: "string"
+        example: ""
+      loginId:
+        properties: {}
+        type: "string"
+        example: "86955458592"
+      loginType:
+        properties: {}
+        type: "integer"
+        example: "1"
+        format: "int32"
+      ClientId:
+        properties: {}
+        type: "string"
+        example: "11223344"
+      requestType:
+        properties: {}
+        type: "integer"
+        format: "int32"
+        example: "1"
+      dspUniqueid:
+        properties: {}
+        type: "string"
+        example: "1235666"
+      branchCode:
+        properties: {}
+        type: "string"
+        example: "12345"
+      object1:
+        properties: {}
+        $ref: "#/definitions/b"
+      object2:
+        properties: {}
+        type: "array"
+        items:
+          type: "string"
+    additionalProperties: false
+  b:
+    properties:
+      name:
+        type: "string"
+      key:
+        properties: {}
+        type: "string"
+        example: "value"
+      subobject:
+        properties: {}
+        type: "object"
+      subarray:
+        properties: {}
+        type: "array"
+        items:
+          type: "string"
+    additionalProperties: false
+tags: []
